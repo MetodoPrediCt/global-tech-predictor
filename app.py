@@ -6,7 +6,7 @@ from statsmodels.tsa.arima.model import ARIMA
 st.set_page_config(page_title="PrediCt - Fed 2025 Forecast", layout="centered")
 
 # Branding (opcional: logo si tenés URL pública en GitHub o CDN)
-st.image("https://raw.githubusercontent.com/yourusername/predict-fed2025/main/Predict-Logo-rgb.png", width=250)
+st.image("https://raw.githubusercontent.com/yourusername/predict-fed2025/main/Predict-Logo-BW.jpg", width=250)
 
 # Títulos y autor
 st.title("PrediCt - Forecast the Fed Rate")
