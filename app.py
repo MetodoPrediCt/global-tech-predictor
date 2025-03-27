@@ -1,48 +1,26 @@
 import streamlit as st
-import plotly.express as px
-import pandas as pd
-
-df = pd.DataFrame({
-    "Mes": ["Ene", "Feb", "Mar", "Abr"],
-    "Inflación": [3.2, 3.4, 3.1, 2.9]
-})
-
-fig = px.line(df, x="Mes", y="Inflación", title="Inflación mensual 2025")
-fig.show()
+import yfinance as yf
+from statsmodels.tsa.arima.model import ARIMA
 import plotly.express as px
 
-# Configuración profesional de la página
-st.set_page_config(
-    page_title="Global Tech Predictor",
-    page_icon="🌐",
-    layout="wide"
-)
+st.image("logo_predict.png")
+st.title("Metodo PrediCt - Fed 2025 Prediction")
+st.write("Santiago Acosta - International Trade Advisor | metodopredict@gmail.com | +54 351 688-3177 | Javier Lopez 2656, 5009 Córdoba, Argentina")
 
-# Título y descripción
-st.title("🌍 Global Tech Predictor")
-st.markdown("""
-    *Real-time market predictions for tech startups worldwide.  
-    Data sources: Crunchbase, World Bank, and proprietary AI models.*
-""")
+inflacion = st.slider("US Inflation (%)", 2.0, 5.0, 3.2)
+desempleo = st.slider("US Unemployment (%)", 3.0, 6.0, 4.1)
 
-# Carga de datos con caché (¡más rápido!)
-@st.cache_data
-def load_data():
-    # Ejemplo: Datos públicos de acciones tech (reemplaza con tus datos)
-    data = pd.DataFrame({
-        "Date": pd.date_range(start="2023-01-01", periods=12, freq="M"),
-        "Revenue": [100, 120, 150, 180, 200, 240, 300, 350, 400, 450, 500, 600]
-    })
-    return data
+data = yf.download("^IRX", period="1y")["Close"]
+model = ARIMA(data, order=(1,1,0)).fit()
+tasa_fed = model.forecast()[0] - (0.5 if inflacion < 3.5 and desempleo > 4 else 0)
+sp500_base = yf.download("SPY", period="1d")["Close"][-1]
+sp500_pred = sp500_base * (1.08 if tasa_fed < 4 else 1)
 
-df = load_data()
+st.metric("Predicted Fed Rate (April 2025)", f"{tasa_fed:.2f}%")
+st.metric("Estimated S&P 500", f"${sp500_pred:.2f} (+8%)")
+fig = px.line(data, title="1-Year Treasury Yield Trend", labels={"value": "Yield (%)"})
+st.plotly_chart(fig)
+st.image("banner_predict.png")
 
-# Gráfico interactivo con Plotly
-fig = px.line(df, x="Date", y="Revenue", 
-              title="Tech Startup Revenue Growth (2023)",
-              labels={"Revenue": "Revenue (USD thousands)"})
-st.plotly_chart(fig, use_container_width=True)
-
-# Botón de acción (ejemplo: descarga de reporte)
-if st.button("📊 Download Full Report (PDF)"):
-    st.success("Report generated! Check your downloads.")
+if st.button("Request Custom Report ($50)"):
+    st.success("Email your request to metodopredict@gmail.com")
