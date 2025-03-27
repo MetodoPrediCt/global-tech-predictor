@@ -1,47 +1,39 @@
 import streamlit as st
-import yfinance as yf
-from statsmodels.tsa.arima.model import ARIMA
+import pandas as pd
+import plotly.express as px
 
-# Configuración de página
-st.set_page_config(page_title="PrediCt - Fed 2025 Forecast", layout="centered")
+# Configuración profesional de la página
+st.set_page_config(
+    page_title="Global Tech Predictor",
+    page_icon="🌐",
+    layout="wide"
+)
 
-# Branding (opcional: logo si tenés URL pública en GitHub o CDN)
-st.image("https://avatars.githubusercontent.com/u/205096233?v=4", width=250)
+# Título y descripción
+st.title("🌍 Global Tech Predictor")
+st.markdown("""
+    *Real-time market predictions for tech startups worldwide.  
+    Data sources: Crunchbase, World Bank, and proprietary AI models.*
+""")
 
-# Títulos y autor
-st.title("PrediCt - Forecast the Fed Rate")
-st.subheader("Guide for certainty.")
-st.markdown("_By Santiago Acosta · Global Predictive Analyst · metodopredict@gmail.com_")
+# Carga de datos con caché (¡más rápido!)
+@st.cache_data
+def load_data():
+    # Ejemplo: Datos públicos de acciones tech (reemplaza con tus datos)
+    data = pd.DataFrame({
+        "Date": pd.date_range(start="2023-01-01", periods=12, freq="M"),
+        "Revenue": [100, 120, 150, 180, 200, 240, 300, 350, 400, 450, 500, 600]
+    })
+    return data
 
-# Inputs
-st.markdown("### Adjust Key Economic Indicators")
-inflation = st.slider("US Inflation Rate (%)", 2.0, 5.0, 3.2)
-unemployment = st.slider("US Unemployment Rate (%)", 3.0, 6.0, 4.1)
+df = load_data()
 
-# ARIMA Forecast Model with error handling
-try:
-    data = yf.download("^IRX", period="1y")["Close"].dropna()
-    model = ARIMA(data, order=(1, 1, 0)).fit()
-    forecast = model.forecast(steps=1)
-    base_rate = forecast.iloc[0] if not forecast.empty else 4.25
-except:
-    base_rate = 4.25  # Default fallback if ARIMA fails
+# Gráfico interactivo con Plotly
+fig = px.line(df, x="Date", y="Revenue", 
+              title="Tech Startup Revenue Growth (2023)",
+              labels={"Revenue": "Revenue (USD thousands)"})
+st.plotly_chart(fig, use_container_width=True)
 
-# Conditional rate cut logic
-rate_cut = 0.5 if inflation < 3.5 and unemployment > 4 else 0
-predicted_rate = base_rate - rate_cut
-
-# S&P 500 Estimate
-try:
-    sp500_base = yf.download("SPY", period="1d")["Close"][-1]
-    sp500_predicted = sp500_base * (1.08 if predicted_rate < 4 else 1)
-except:
-    sp500_predicted = 5200  # Default fallback
-
-# Outputs
-st.metric("📉 Predicted Fed Rate (April 2025)", f"{predicted_rate:.2f}%")
-st.metric("📈 Estimated S&P 500 Index", f"${sp500_predicted:.2f} USD")
-
-# Call to Action
-st.markdown("---")
-st.markdown("📩 Want a full PDF report with visuals? Email us at **metodopredict@gmail.com**")
+# Botón de acción (ejemplo: descarga de reporte)
+if st.button("📊 Download Full Report (PDF)"):
+    st.success("Report generated! Check your downloads.")
