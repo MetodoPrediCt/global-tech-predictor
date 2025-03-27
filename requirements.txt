@@ -4,4 +4,3 @@ statsmodels
 pandas
 numpy
 plotly
-(otros archivos como datos/)
