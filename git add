@@ -1,3 +1,3 @@
-git add .
-git commit -m "Mejoras en el modelo predictivo"
+git add requirements.txt
+git commit -m "Add Plotly dependency"
 git push origin main
