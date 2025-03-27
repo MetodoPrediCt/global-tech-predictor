@@ -1,5 +1,15 @@
 import streamlit as st
+
+import plotly.express as px
 import pandas as pd
+
+df = pd.DataFrame({
+    "Mes": ["Ene", "Feb", "Mar", "Abr"],
+    "Inflación": [3.2, 3.4, 3.1, 2.9]
+})
+
+fig = px.line(df, x="Mes", y="Inflación", title="Inflación mensual 2025")
+fig.show()
 import plotly.express as px
 
 # Configuración profesional de la página
