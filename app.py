@@ -1,3 +1,7 @@
+git add .
+git commit -m "Mejoras en el modelo predictivo"
+git push origin main
+
 import streamlit as st
 import yfinance as yf
 from statsmodels.tsa.arima.model import ARIMA
