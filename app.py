@@ -1,26 +1,47 @@
 import streamlit as st
 import yfinance as yf
 from statsmodels.tsa.arima.model import ARIMA
-import plotly.express as px
 
-st.image("logo_predict.png")
-st.title("Metodo PrediCt - Fed 2025 Prediction")
-st.write("Santiago Acosta - International Trade Advisor | metodopredict@gmail.com | +54 351 688-3177 | Javier Lopez 2656, 5009 Córdoba, Argentina")
+# Configuración de la página
+st.set_page_config(page_title="PrediCt - Fed 2025 Forecast", layout="centered")
 
-inflacion = st.slider("US Inflation (%)", 2.0, 5.0, 3.2)
-desempleo = st.slider("US Unemployment (%)", 3.0, 6.0, 4.1)
+# Logo (opcional: subilo a GitHub o quitá esta línea si no tenés)
+st.image("https://raw.githubusercontent.com/yourusername/predict-fed2025/main/Predict-Logo-rgb.png", width=250)
 
-data = yf.download("^IRX", period="1y")["Close"]
-model = ARIMA(data, order=(1,1,0)).fit()
-tasa_fed = model.forecast()[0] - (0.5 if inflacion < 3.5 and desempleo > 4 else 0)
-sp500_base = yf.download("SPY", period="1d")["Close"][-1]
-sp500_pred = sp500_base * (1.08 if tasa_fed < 4 else 1)
+# Título y autor
+st.title("PrediCt - Forecast the Fed Rate")
+st.subheader("Guide for certainty.")
+st.markdown("_By Santiago Acosta · Global Predictive Analyst · metodopredict@gmail.com_")
 
-st.metric("Predicted Fed Rate (April 2025)", f"{tasa_fed:.2f}%")
-st.metric("Estimated S&P 500", f"${sp500_pred:.2f} (+8%)")
-fig = px.line(data, title="1-Year Treasury Yield Trend", labels={"value": "Yield (%)"})
-st.plotly_chart(fig)
-st.image("banner_predict.png")
+# Inputs
+st.markdown("### Adjust Key Economic Indicators")
+inflation = st.slider("US Inflation Rate (%)", 2.0, 5.0, 3.2)
+unemployment = st.slider("US Unemployment Rate (%)", 3.0, 6.0, 4.1)
 
-if st.button("Request Custom Report ($50)"):
-    st.success("Email your request to metodopredict@gmail.com")
+# ARIMA Forecast Model with error handling
+try:
+    data = yf.download("^IRX", period="1y")["Close"].dropna()
+    model = ARIMA(data, order=(1, 1, 0)).fit()
+    forecast = model.forecast(steps=1)
+    base_rate = forecast.iloc[0] if not forecast.empty else 4.25
+except:
+    base_rate = 4.25  # fallback rate
+
+# Conditional logic for predicted rate
+rate_cut = 0.5 if inflation < 3.5 and unemployment > 4 else 0
+predicted_rate = base_rate - rate_cut
+
+# S&P 500 estimation
+try:
+    sp500_base = yf.download("SPY", period="1d")["Close"][-1]
+    sp500_predicted = sp500_base * (1.08 if predicted_rate < 4 else 1)
+except:
+    sp500_predicted = 5200  # fallback value
+
+# Output metrics
+st.metric("📉 Predicted Fed Rate (April 2025)", f"{predicted_rate:.2f}%")
+st.metric("📈 Estimated S&P 500 Index", f"${sp500_predicted:.2f} USD")
+
+# CTA
+st.markdown("---")
+st.markdown("📩 Want a full PDF report with visuals? Email us at **metodopredict@gmail.com**")
